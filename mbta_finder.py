@@ -10,6 +10,7 @@ https://sites.google.com/site/sd15spring/home/project-toolbox/geocoding-and-web-
 import urllib   # urlencode function
 import urllib2  # urlopen function (better than urllib version)
 import json
+from pprint import pprint
 
 
 # Useful URLs (you need to add the appropriate parameters for your requests)
@@ -18,42 +19,49 @@ MBTA_BASE_URL = "http://realtime.mbta.com/developer/api/v2/stopsbylocation"
 MBTA_DEMO_API_KEY = "wX9NwuHnZU2ToO7GmGR9uw"
 
 
-# A little bit of scaffolding if you want to use it
-
 def get_json(url):
-    """
-    Given a properly formatted URL for a JSON web API request, return
-    a Python JSON object containing the response to that request.
-    """
-    pass
+    f=urllib2.urlopen(url)
+    response_text = f.read()
+    response_data = json.loads(response_text)
+    return response_data
+
 
 
 def get_lat_long(place_name):
-    """
-    Given a place name or address, return a (latitude, longitude) tuple
-    with the coordinates of the given place.
+    pn = place_name.split()
+    ppn = str()
+    for word in pn:
+        ppn +=word + "+"
 
-    See https://developers.google.com/maps/documentation/geocoding/
-    for Google Maps Geocode API URL formatting requirements.
-    """
-    pass
-
+    pppn = ppn[:-1]
+    url = GMAPS_BASE_URL + "?address=" + pppn
+    result = get_json(url)
+    lat = result["results"][0]["geometry"]["location"]["lat"]
+    lon = result["results"][0]["geometry"]["location"]["lng"]
+    re = [lat,lon]
+    return re
 
 def get_nearest_station(latitude, longitude):
-    """
-    Given latitude and longitude strings, return a (station_name, distance)
-    tuple for the nearest MBTA station to the given coordinates.
+    url = MBTA_BASE_URL + "?api_key=" + MBTA_DEMO_API_KEY + "&lat=" + str(latitude) + "&lon=" + str(longitude) + "&format=json"
+    result = get_json(url)
+    xx=99999.0
+    y=str()
+    for key in result[u'stop']:
+        if float(key[u'distance']) < xx:
+            xx = key[u'distance']
+            y = key[u'stop_name']
+    re = (xx,y)
+    return re
 
-    See http://realtime.mbta.com/Portal/Home/Documents for URL
-    formatting requirements for the 'stopsbylocation' API.
-    """
-    pass
 
 
 def find_stop_near(place_name):
-    """
-    Given a place name or address, print the nearest MBTA stop and the 
-    distance from the given place to that stop.
-    """
-    pass
+    latlon = get_lat_long(place_name)
+    stadis = get_nearest_station(latlon[0],latlon[1])
+    print stadis[1]
+    print stadis[0]
 
+
+# A little bit of scaffolding if you want to use it
+
+find_stop_near("02481")

@@ -20,14 +20,22 @@ MBTA_DEMO_API_KEY = "wX9NwuHnZU2ToO7GmGR9uw"
 
 # A little bit of scaffolding if you want to use it
 
+import urllib2, json
+from pprint import pprint
 def get_json(url):
     """
     Given a properly formatted URL for a JSON web API request, return
     a Python JSON object containing the response to that request.
     """
-    pass
+    f = urllib2.urlopen(url)
+    response_text = f.read()
+    response_data = json.loads(response_text)
+    pprint(response_data)
 
+get_json("https://maps.googleapis.com/maps/api/geocode/json?address=BabsonCollege")
 
+import urllib2, json
+from pprint import pprint
 def get_lat_long(place_name):
     """
     Given a place name or address, return a (latitude, longitude) tuple
@@ -36,9 +44,18 @@ def get_lat_long(place_name):
     See https://developers.google.com/maps/documentation/geocoding/
     for Google Maps Geocode API URL formatting requirements.
     """
-    pass
+    url = "https://maps.googleapis.com/maps/api/geocode/json?address=" + place_name
+    f = urllib2.urlopen(url)
+    response_text = f.read()
+    response_data = json.loads(response_text)
+    print response_data["results"][0]["geometry"]["location"]
+
+get_lat_long(BabsonCollege)
+#{u'lat': 42.298139, u'lng': -71.26532929999999}
 
 
+import urllib2, json
+from pprint import pprint
 def get_nearest_station(latitude, longitude):
     """
     Given latitude and longitude strings, return a (station_name, distance)
@@ -47,13 +64,36 @@ def get_nearest_station(latitude, longitude):
     See http://realtime.mbta.com/Portal/Home/Documents for URL
     formatting requirements for the 'stopsbylocation' API.
     """
-    pass
+    url = "http://realtime.mbta.com/developer/api/v2/stopsbylocation?api_key=wX9NwuHnZU2ToO7GmGR9uw&lat=" + latitude + "&lon=" + longitude + "&format=json"
+    f = urllib2.urlopen(url)
+    response_text = f.read()
+    response_data = json.loads(response_text)
+    print response_data["stop"][0]["parent_station_name"]
 
+get_nearest_station("42.3530197143555", "-71.0645904541016")
+#Boylston
 
+import urllib2, json
+from pprint import pprint
 def find_stop_near(place_name):
     """
-    Given a place name or address, print the nearest MBTA stop and the 
+    Given a place name or address, print the nearest MBTA stop and the
     distance from the given place to that stop.
     """
-    pass
+     url = "https://maps.googleapis.com/maps/api/geocode/json?address=" + place_name
+    f = urllib2.urlopen(url)
+    response_text = f.read()
+    response_data = json.loads(response_text)
+    latitude = str(response_data["results"][0]["geometry"]["location"]["lat"])
+    longitude = str(response_data["results"][0]["geometry"]["location"]["lng"])
 
+    urla = "http://realtime.mbta.com/developer/api/v2/stopsbylocation?api_key=wX9NwuHnZU2ToO7GmGR9uw&lat=" + latitude + "&lon=" + longitude + "&format=json"
+    fa = urllib2.urlopen(urla)
+    response_texta = fa.read()
+    response_dataa = json.loads(response_texta)
+    print response_dataa["stop"][0]["stop_name"]
+    print response_dataa["stop"][0]["distance"]
+
+find_stop_near("HarvardUniversity")
+# Massachusetts Ave @ Wendell St
+# 0.183475628495216
